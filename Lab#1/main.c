@@ -5,8 +5,10 @@
 
 #define IDC_ADD_BUTTON 100
 #define IDC_COUNT_BUTTON 101
+#define IDC_TEXT_LIST 102
+#define IDC_TEXT_INPUT 103
 
-LPSTR szClassName = "MyCustomClass";
+LPSTR szClassName = "Lab1Class";
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE hInst;
 
@@ -45,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
         "Lab#1",                                                                // Window title
         WS_OVERLAPPEDWINDOW,                                                    // Basic window style
         CW_USEDEFAULT, CW_USEDEFAULT,                                           // Set starting point to default value
-        400, 300,                                                               // Set all the dimensions to default value
+        400, 260,                                                               // Set all the dimensions to default value
         NULL,                                                                   //no parent window
         NULL,                                                                   //no menu
         hInst,
@@ -64,7 +66,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    static HWND hwndAddButton, hwndCountButton, hwndText;
+    static HWND hwndAddButton, hwndCountButton, hwndTextList, hwndTextInput;
     RECT rect ;
     PAINTSTRUCT ps ;
     HDC hdc;
@@ -75,10 +77,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_CREATE:
             hwndAddButton = CreateWindow(
                 TEXT("button"),                                                 // The class name required is button
-                TEXT("Push Button"),                                            // the caption of the button
+                TEXT("Add line to the list"),                                            // the caption of the button
                 WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,                           // the styles
-                5, 200,                                                         // the left and top co-ordinates
-                100, 40,                                                        // width and height
+                257, 170,                                                         // the left and top co-ordinates
+                130, 20,                                                        // width and height
                 hwnd,                                                           // parent window handle
                 (HMENU)IDC_ADD_BUTTON,                                          // the ID of your button
                 hInst,                                                          // the instance of your application
@@ -86,23 +88,35 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
             hwndCountButton = CreateWindow(
                 TEXT("button"),                                                 // The class name required is button
-                TEXT("Push Button2"),                                           // the caption of the button
+                TEXT("Count the lines in the textbox"),                                           // the caption of the button
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,                          // the styles
-                110, 200,                                                       // the left and top co-ordinates
-                100, 40,                                                        // width and height
+                5, 200,                                                       // the left and top co-ordinates
+                382, 30,                                                        // width and height
                 hwnd,                                                           // parent window handle
                 (HMENU)IDC_COUNT_BUTTON,                                        // the ID of your button
                 hInst,                                                          // the instance of your application
                 NULL);                                                          // extra bits you dont really need
 
-            hwndText = CreateWindow(
+            hwndTextList = CreateWindow(
                 TEXT("edit"),                                                   // The class name required is edit
                 TEXT(""),                                                       // Default text.
-                WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_AUTOHSCROLL,     // the styles
+                WS_VISIBLE | WS_CHILD | WS_BORDER | WS_VSCROLL |
+                ES_AUTOVSCROLL | ES_MULTILINE | ES_READONLY,                    // Textbox styles
                 5, 20,                                                          // the left and top co-ordinates
                 382, 140,                                                       // width and height
                 hwnd,                                                           // parent window handle
-                (HMENU)11,                                                      // the ID of your editbox
+                (HMENU)IDC_TEXT_LIST,                                           // the ID of your editbox
+                hInst,                                                          // the instance of your application
+                NULL);                                                          // extra bits you dont really need
+
+            hwndTextInput = CreateWindow(
+                TEXT("edit"),                                                   // The class name required is edit
+                TEXT(""),                                                       // Default text.
+                WS_VISIBLE | WS_CHILD | WS_BORDER,                    // Textbox styles
+                5, 170,                                                         // the left and top co-ordinates
+                242, 20,                                                        // width and height
+                hwnd,                                                           // parent window handle
+                (HMENU)IDC_TEXT_LIST,                                           // the ID of your editbox
                 hInst,                                                          // the instance of your application
                 NULL);                                                          // extra bits you dont really need
             break;
