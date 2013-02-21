@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <tchar.h>
 
@@ -11,6 +12,7 @@
 LPSTR szClassName = "Lab1Class";
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE hInst;
+int items;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)
 {
@@ -72,6 +74,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     PAINTSTRUCT ps ;
     HDC hdc;
     LPSTR title = _T("A simple and awesome window.");
+    LRESULT textSize;
 
     switch(msg)
     {
@@ -81,7 +84,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 TEXT("button"),                                                 // The class name required is button
                 TEXT("Add line to the list"),                                            // the caption of the button
                 WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,                           // the styles
-                257, 170,                                                         // the left and top co-ordinates
+                257, 170,                                                       // the left and top co-ordinates
                 130, 20,                                                        // width and height
                 hwnd,                                                           // parent window handle
                 (HMENU)IDC_ADD_BUTTON,                                          // the ID of your button
@@ -93,7 +96,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 TEXT("button"),                                                 // The class name required is button
                 TEXT("Count the lines in the textbox"),                                           // the caption of the button
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,                          // the styles
-                5, 200,                                                       // the left and top co-ordinates
+                5, 200,                                                         // the left and top co-ordinates
                 382, 30,                                                        // width and height
                 hwnd,                                                           // parent window handle
                 (HMENU)IDC_COUNT_BUTTON,                                        // the ID of your button
@@ -117,7 +120,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 (DWORD)NULL,
                 TEXT("edit"),                                                   // The class name required is edit
                 TEXT(""),                                                       // Default text.
-                WS_VISIBLE | WS_CHILD | WS_BORDER,                    // Textbox styles
+                WS_VISIBLE | WS_CHILD | WS_BORDER,                              // Textbox styles
                 5, 170,                                                         // the left and top co-ordinates
                 242, 20,                                                        // width and height
                 hwnd,                                                           // parent window handle
@@ -126,6 +129,36 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 NULL);                                                          // extra bits you dont really need
             break;
 
+        case WM_COMMAND:
+            switch (LOWORD(wParam))
+            {
+                case IDC_COUNT_BUTTON:
+                    char * message = new char[100];
+                    sprintf(message, "There are %d items in the list.", items);
+                    if(HIWORD(wParam) == BN_CLICKED)
+                        MessageBox(hwnd, message, "Items counter", MB_ICONINFORMATION);
+                    break;
+
+                case IDC_ADD_BUTTON:
+                    textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
+                    char *text = new char[textSize];
+                    SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)text);
+                    if(strlen(text))
+                    {
+                        char *item = new char[200];
+                        strcpy(item, " - ");                                    // Managing the new string
+                        strcat(item, text);
+                        strcat(item, "\r\n");
+                        SendMessage(hwndTextList, EM_REPLACESEL,
+                            TRUE, (LPARAM)item);                                // Appending a new item in the list
+                        SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
+                        delete [] item;                                         // Managing the memory
+                        items += 1;                                             // Incrementing the number of items
+                    }
+                    delete [] text;
+                    break;
+            }
+            break;
         case WM_PAINT:
             hdc = BeginPaint(hwnd, &ps);
             GetClientRect(hwnd, &rect);                                         // Getting coordinates of window client area
