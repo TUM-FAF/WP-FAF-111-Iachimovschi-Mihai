@@ -73,7 +73,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     RECT rect ;
     PAINTSTRUCT ps ;
     HDC hdc;
-    LPSTR title = _T("A simple and awesome window.");
+    LPSTR title = _T("A simple task tracker.");
     LRESULT textSize;
 
     switch(msg)
@@ -82,7 +82,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             hwndAddButton = CreateWindowEx(
                 (DWORD)NULL,
                 TEXT("button"),                                                 // The class name required is button
-                TEXT("Add line to the list"),                                            // the caption of the button
+                TEXT("Add task to the list"),                                   // the caption of the button
                 WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,                           // the styles
                 257, 170,                                                       // the left and top co-ordinates
                 130, 20,                                                        // width and height
@@ -94,7 +94,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             hwndCountButton = CreateWindowEx(
                 (DWORD)NULL,
                 TEXT("button"),                                                 // The class name required is button
-                TEXT("Count the lines in the textbox"),                                           // the caption of the button
+                TEXT("Count all tracked tasks"),                                // the caption of the button
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,                          // the styles
                 5, 200,                                                         // the left and top co-ordinates
                 382, 30,                                                        // width and height
@@ -134,9 +134,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             {
                 case IDC_COUNT_BUTTON:
                     char * message = new char[100];
-                    sprintf(message, "There are %d items in the list.", items);
+                    sprintf(message, "There are %d tasks in the list.", items);
                     if(HIWORD(wParam) == BN_CLICKED)
-                        MessageBox(hwnd, message, "Items counter", MB_ICONINFORMATION);
+                        MessageBox(hwnd, message, "Tasks counter", MB_ICONINFORMATION);
                     break;
 
                 case IDC_ADD_BUTTON:
@@ -169,7 +169,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             EndPaint(hwnd, &ps);
             break;
         case WM_CLOSE:
-            if(MessageBox(hwnd, "Are you sure that you want to close this awesome window?", "Lab#1", MB_OKCANCEL) == IDOK)
+            if(MessageBox(hwnd, "Are you sure that you want to close this task tracker?", "Lab#1", MB_OKCANCEL) == IDOK)
                 DestroyWindow(hwnd);
             break;
         case WM_DESTROY:
