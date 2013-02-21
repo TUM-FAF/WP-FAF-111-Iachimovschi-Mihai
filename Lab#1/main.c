@@ -42,7 +42,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
         return 0;
     }
 
-    hwnd = CreateWindow(
+    hwnd = CreateWindowEx(
+        (DWORD)NULL,
         szClassName,
         "Lab#1",                                                                // Window title
         WS_OVERLAPPEDWINDOW,                                                    // Basic window style
@@ -75,7 +76,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     switch(msg)
     {
         case WM_CREATE:
-            hwndAddButton = CreateWindow(
+            hwndAddButton = CreateWindowEx(
+                (DWORD)NULL,
                 TEXT("button"),                                                 // The class name required is button
                 TEXT("Add line to the list"),                                            // the caption of the button
                 WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,                           // the styles
@@ -86,7 +88,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,                                                          // the instance of your application
                 NULL);
 
-            hwndCountButton = CreateWindow(
+            hwndCountButton = CreateWindowEx(
+                (DWORD)NULL,
                 TEXT("button"),                                                 // The class name required is button
                 TEXT("Count the lines in the textbox"),                                           // the caption of the button
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,                          // the styles
@@ -97,7 +100,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,                                                          // the instance of your application
                 NULL);                                                          // extra bits you dont really need
 
-            hwndTextList = CreateWindow(
+            hwndTextList = CreateWindowEx(
+                (DWORD)NULL,
                 TEXT("edit"),                                                   // The class name required is edit
                 TEXT(""),                                                       // Default text.
                 WS_VISIBLE | WS_CHILD | WS_BORDER | WS_VSCROLL |
@@ -109,7 +113,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,                                                          // the instance of your application
                 NULL);                                                          // extra bits you dont really need
 
-            hwndTextInput = CreateWindow(
+            hwndTextInput = CreateWindowEx(
+                (DWORD)NULL,
                 TEXT("edit"),                                                   // The class name required is edit
                 TEXT(""),                                                       // Default text.
                 WS_VISIBLE | WS_CHILD | WS_BORDER,                    // Textbox styles
