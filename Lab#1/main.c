@@ -119,12 +119,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             hwndTextInput = CreateWindowEx(
                 (DWORD)NULL,
                 TEXT("edit"),                                                   // The class name required is edit
-                TEXT(""),                                                       // Default text.
+                TEXT("Type here the new task..."),                              // Default text.
                 WS_VISIBLE | WS_CHILD | WS_BORDER,                              // Textbox styles
                 5, 170,                                                         // the left and top co-ordinates
                 242, 20,                                                        // width and height
                 hwnd,                                                           // parent window handle
-                (HMENU)IDC_TEXT_LIST,                                           // the ID of your editbox
+                (HMENU)IDC_TEXT_INPUT,                                          // the ID of your editbox
                 hInst,                                                          // the instance of your application
                 NULL);                                                          // extra bits you dont really need
             break;
@@ -156,6 +156,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                         items += 1;                                             // Incrementing the number of items
                     }
                     delete [] text;
+                    break;
+                case IDC_TEXT_INPUT:
+                    if(HIWORD(wParam) == EN_SETFOCUS)
+                        SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
                     break;
             }
             break;
