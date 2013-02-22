@@ -228,6 +228,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             SetTextColor(hdc, RGB(152, 0, 16));                                 // Setting the text color
             DrawText(hdc, title, -1, &rect, DT_CENTER | DT_TOP);                // Drawind the text on top aligning it to center
             SetTextColor(hdc, RGB(0, 0, 0));                                    // Resetting the color
+            char * itemCnt = new char[10];
+            sprintf(itemCnt, "%d  ", items);
+            DrawText(hdc, itemCnt, -1, &rect, DT_RIGHT | DT_TOP);               // Drawind the text on top aligning it to center
             EndPaint(hwnd, &ps);
             break;
         case WM_CLOSE:
