@@ -171,7 +171,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                             hwndTextInput,
                             WM_SETTEXT,
                             TRUE,
-                            (LPARAM)placeholder);               // Recovering the placeholder
+                            (LPARAM)placeholder);                               // Recovering the placeholder
                         focused = 0;
                     }
                     RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE);
@@ -199,7 +199,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                                 hwndTextInput,
                                 WM_SETTEXT,
                                 TRUE,
-                                (LPARAM)placeholder);           // Recovering the placeholder
+                                (LPARAM)placeholder);                           // Recovering the placeholder
                             focused = 0;
                             RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
                         }
@@ -234,13 +234,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             hdc = BeginPaint(hwnd, &ps);
             GetClientRect(hwnd, &rect);                                         // Getting coordinates of window client area
             SetBkMode(hdc, TRANSPARENT);                                        // Set the background to be transparent
-            SetTextColor(hdc, RGB(152, 0, 16));                                 // Setting the text color
+            SetTextColor(hdc, RGB(152, 0, 16));                                 // Setting the text color to a dark red
             DrawText(hdc, title, -1, &rect, DT_CENTER | DT_TOP);                // Drawind the text on top aligning it to center
-            SetTextColor(hdc, RGB(0, 100, 0));                                    // Resetting the color
+            SetTextColor(hdc, RGB(0, 100, 0));                                  // Setting color to a dark green
             char * itemCnt = new char[10];
-            sprintf(itemCnt, "%d  ", items);
-            DrawText(hdc, itemCnt, -1, &rect, DT_RIGHT | DT_TOP);               // Drawind the text on top aligning it to center
-            SetTextColor(hdc, RGB(0, 100, 0));                                    // Resetting the color
+            sprintf(itemCnt, "%d  ", items);                                    // Creating the counter string
+            DrawText(hdc, itemCnt, -1, &rect, DT_RIGHT | DT_TOP);               // Drawing the text on top aligning it to right
+            SetTextColor(hdc, RGB(0, 0, 0));                                    // Resetting the color to black
             EndPaint(hwnd, &ps);
             break;
         case WM_CLOSE:
