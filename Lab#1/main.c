@@ -79,6 +79,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     switch(msg)
     {
         case WM_CREATE:
+            int screenW = GetSystemMetrics(SM_CXSCREEN);
+            int screenH = GetSystemMetrics(SM_CYSCREEN);
+            GetWindowRect(hwnd, &rect);
+            SetWindowPos(
+                    hwnd, 0,
+                    (screenW - rect.right)/2,
+                    (screenH - rect.bottom)/2,
+                    0, 0, SWP_NOZORDER|SWP_NOSIZE);
+
             hwndAddButton = CreateWindowEx(
                 (DWORD)NULL,
                 TEXT("button"),                                                 // The class name required is button
@@ -149,7 +158,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                         if(items)
                             strcpy(item, "\r\n - ");
                         else
-                            strcpy(item, " - ");                                    // Managing the new string
+                            strcpy(item, " - ");                                // Managing the new string
                         strcat(item, text);
                         SendMessage(hwndTextList, EM_REPLACESEL,
                             TRUE, (LPARAM)item);                                // Appending a new item in the list
