@@ -76,6 +76,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     LPSTR title = _T("A simple task tracker.");
     LRESULT textSize;
     char * message = new char[100];
+    char * placeholder = new char[26];
+    placeholder = "Type here the new task...";
 
     switch(msg)
     {
@@ -129,7 +131,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             hwndTextInput = CreateWindowEx(
                 (DWORD)NULL,
                 TEXT("edit"),                                                   // The class name required is edit
-                TEXT("Type here the new task..."),                              // Default text.
+                TEXT(placeholder),                                              // Default text.
                 WS_VISIBLE | WS_CHILD | WS_BORDER,                              // Textbox styles
                 5, 170,                                                         // the left and top co-ordinates
                 242, 20,                                                        // width and height
@@ -152,7 +154,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
                     char *text = new char[textSize];
                     SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)text);
-                    if(strlen(text) && strcmp(text, "Type here the new task..."))
+                    if(strlen(text) && strcmp(text, placeholder))
                     {
                         char *item = new char[200];
                         if(items)
@@ -169,7 +171,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                             hwndTextInput,
                             WM_SETTEXT,
                             TRUE,
-                            (LPARAM)"Type here the new task...");               // Recovering the placeholder
+                            (LPARAM)placeholder);               // Recovering the placeholder
                         focused = 0;
                     }
                     RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE);
@@ -180,7 +182,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     {
                         textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
                         SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)message);
-                        if(!strcmp(message, "Type here the new task..."))
+                        if(!strcmp(message, placeholder))
                         {
                             SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
                             focused = 1;
@@ -197,7 +199,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                                 hwndTextInput,
                                 WM_SETTEXT,
                                 TRUE,
-                                (LPARAM)"Type here the new task...");           // Recovering the placeholder
+                                (LPARAM)placeholder);           // Recovering the placeholder
                             focused = 0;
                             RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
                         }
@@ -234,10 +236,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             SetBkMode(hdc, TRANSPARENT);                                        // Set the background to be transparent
             SetTextColor(hdc, RGB(152, 0, 16));                                 // Setting the text color
             DrawText(hdc, title, -1, &rect, DT_CENTER | DT_TOP);                // Drawind the text on top aligning it to center
-            SetTextColor(hdc, RGB(0, 0, 0));                                    // Resetting the color
+            SetTextColor(hdc, RGB(0, 100, 0));                                    // Resetting the color
             char * itemCnt = new char[10];
             sprintf(itemCnt, "%d  ", items);
             DrawText(hdc, itemCnt, -1, &rect, DT_RIGHT | DT_TOP);               // Drawind the text on top aligning it to center
+            SetTextColor(hdc, RGB(0, 100, 0));                                    // Resetting the color
             EndPaint(hwnd, &ps);
             break;
         case WM_CLOSE:
