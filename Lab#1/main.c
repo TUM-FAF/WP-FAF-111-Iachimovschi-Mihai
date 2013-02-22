@@ -12,7 +12,7 @@
 LPSTR szClassName = "Lab1Class";
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE hInst;
-int items;
+int items, focused = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)
 {
@@ -174,18 +174,26 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                         textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
                         SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)message);
                         if(!strcmp(message, "Type here the new task..."))
+                        {
                             SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
+                            focused = 1;
+                            RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
+                        }
                     }
                     else if(HIWORD(wParam) == EN_KILLFOCUS)
                     {
                         textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
                         SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)message);
                         if(!strcmp(message, ""))
+                        {
                             SendMessage(
                                 hwndTextInput,
                                 WM_SETTEXT,
                                 TRUE,
                                 (LPARAM)"Type here the new task...");           // Recovering the placeholder
+                            focused = 0;
+                            RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
+                        }
                     }
                     break;
             }
@@ -194,11 +202,21 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             if(GetDlgCtrlID((HWND)lParam) == IDC_TEXT_INPUT)
             {
                 HBRUSH color;
-                color = CreateSolidBrush(RGB(255, 255, 255));
                 hdc = (HDC)wParam;                                              //Get handles
-                SetTextColor(hdc, RGB(150, 150, 150));                          // Text color
-                SetBkMode(hdc, TRANSPARENT);                                    // EditBox Backround Mode
-                SetBkColor(hdc,(LONG)color);                                    // Backround color for EditBox
+                if(focused)
+                {
+                    color = CreateSolidBrush(RGB(255, 255, 255));
+                    SetTextColor(hdc, RGB(0, 0, 0));                            // Text color
+                    SetBkMode(hdc, TRANSPARENT);                                // EditBox Backround Mode
+                    SetBkColor(hdc,(LONG)color);                                // Backround color for EditBox
+                }
+                else
+                {
+                    color = CreateSolidBrush(RGB(255, 255, 255));
+                    SetTextColor(hdc, RGB(150, 150, 150));                      // Text color
+                    SetBkMode(hdc, TRANSPARENT);                                // EditBox Backround Mode
+                    SetBkColor(hdc,(LONG)color);                                // Backround color for EditBox
+                }
                 return (LONG)color;                                             // Paint it
             }
             break;
