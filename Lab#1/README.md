@@ -36,7 +36,7 @@ As a user of Unix-like Operating Systems, I developed my program on Mac OS X usi
 
 So, here is a little mockup of the program.
 
-![Mockup](https://raw.github.com/TUM-FAF/WP-FAF-111-Iachimovschi-Mihai/master/Lab#1/pics/mockup.png)
+![Mockup](https://raw.github.com/TUM-FAF/WP-FAF-111-Iachimovschi-Mihai/master/Lab%231/pics/mockup.png)
 
 1. Two buttons. The "Add Task" button has adds the text written in the textbox and has default style. The second one opens a MessageBox with the number of tasks.
 2. The best thing I think I've done in this laboratory work. This text box has a html5-like grey placeholder that appears on focus lose, and didisappears at focusing on the field.
@@ -47,7 +47,7 @@ So, here is a little mockup of the program.
 7. The icon is specified to be the default one.
 8. There is no resize handler, the window is as is.
 
-![Result](https://raw.github.com/TUM-FAF/WP-FAF-111-Iachimovschi-Mihai/master/Lab#1/pics/screenshot.png)
+![Result](https://raw.github.com/TUM-FAF/WP-FAF-111-Iachimovschi-Mihai/master/Lab%231/pics/screenshot.png)
 
 Speaking about PSG, I think it is TL;DR;... I'd better tell you all the details instead of writing them %)
 
