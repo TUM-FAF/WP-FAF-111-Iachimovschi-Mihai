@@ -146,9 +146,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     if(strlen(text))
                     {
                         char *item = new char[200];
-                        strcpy(item, " - ");                                    // Managing the new string
+                        if(items)
+                            strcpy(item, "\r\n - ");
+                        else
+                            strcpy(item, " - ");                                    // Managing the new string
                         strcat(item, text);
-                        strcat(item, "\r\n");
                         SendMessage(hwndTextList, EM_REPLACESEL,
                             TRUE, (LPARAM)item);                                // Appending a new item in the list
                         SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
