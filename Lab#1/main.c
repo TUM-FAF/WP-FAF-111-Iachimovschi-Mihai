@@ -48,7 +48,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
         (DWORD)NULL,
         szClassName,
         "Lab#1",                                                                // Window title
-        WS_OVERLAPPEDWINDOW,                                                    // Basic window style
+        WS_OVERLAPPED | WS_BORDER | WS_SYSMENU,                                 // Basic window style
         CW_USEDEFAULT, CW_USEDEFAULT,                                           // Set starting point to default value
         400, 260,                                                               // Set all the dimensions to default value
         NULL,                                                                   //no parent window
