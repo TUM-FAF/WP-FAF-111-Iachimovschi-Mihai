@@ -152,7 +152,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
                     char *text = new char[textSize];
                     SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)text);
-                    if(strlen(text))
+                    if(strlen(text) && strcmp(text, "Type here the new task..."))
                     {
                         char *item = new char[200];
                         if(items)
@@ -165,7 +165,14 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                         SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
                         delete [] item;                                         // Managing the memory
                         items += 1;                                             // Incrementing the number of items
+                        SendMessage(
+                            hwndTextInput,
+                            WM_SETTEXT,
+                            TRUE,
+                            (LPARAM)"Type here the new task...");               // Recovering the placeholder
+                        focused = 0;
                     }
+                    RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE);
                     delete [] text;
                     break;
                 case IDC_TEXT_INPUT:
