@@ -75,6 +75,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     HDC hdc;
     LPSTR title = _T("A simple task tracker.");
     LRESULT textSize;
+    char * message = new char[100];
 
     switch(msg)
     {
@@ -101,7 +102,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 NULL);
 
             hwndCountButton = CreateWindowEx(
-                (DWORD)NULL,
+                (DWORD)WS_EX_CLIENTEDGE,
                 TEXT("button"),                                                 // The class name required is button
                 TEXT("Count all tracked tasks"),                                // the caption of the button
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,                          // the styles
@@ -142,7 +143,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             switch (LOWORD(wParam))
             {
                 case IDC_COUNT_BUTTON:
-                    char * message = new char[100];
                     sprintf(message, "There are %d tasks in the list.", items);
                     if(HIWORD(wParam) == BN_CLICKED)
                         MessageBox(hwnd, message, "Tasks counter", MB_ICONINFORMATION);
@@ -170,10 +170,39 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     break;
                 case IDC_TEXT_INPUT:
                     if(HIWORD(wParam) == EN_SETFOCUS)
-                        SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
+                    {
+                        textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
+                        SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)message);
+                        if(!strcmp(message, "Type here the new task..."))
+                            SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
+                    }
+                    else if(HIWORD(wParam) == EN_KILLFOCUS)
+                    {
+                        textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
+                        SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)message);
+                        if(!strcmp(message, ""))
+                            SendMessage(
+                                hwndTextInput,
+                                WM_SETTEXT,
+                                TRUE,
+                                (LPARAM)"Type here the new task...");           // Recovering the placeholder
+                    }
                     break;
             }
             break;
+        case WM_CTLCOLOREDIT:
+            if(GetDlgCtrlID((HWND)lParam) == IDC_TEXT_INPUT)
+            {
+                HBRUSH color;
+                color = CreateSolidBrush(RGB(255, 255, 255));
+                hdc = (HDC)wParam;                                              //Get handles
+                SetTextColor(hdc, RGB(150, 150, 150));                          // Text color
+                SetBkMode(hdc, TRANSPARENT);                                    // EditBox Backround Mode
+                SetBkColor(hdc,(LONG)color);                                    // Backround color for EditBox
+                return (LONG)color;                                             // Paint it
+            }
+            break;
+
         case WM_PAINT:
             hdc = BeginPaint(hwnd, &ps);
             GetClientRect(hwnd, &rect);                                         // Getting coordinates of window client area
