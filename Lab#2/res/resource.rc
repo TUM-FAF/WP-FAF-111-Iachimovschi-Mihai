@@ -1,0 +1,74 @@
+#include <windows.h>
+#include "../include/resource.h"
+
+IDI_APPICON ICON "Application.ico"                                              // Win32 application icon. Found on Google. TODO: To draw a nice icon.
+
+IDR_MAINMENU MENU                                                               // The menu
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "New", 0                                                       // Simple placeholder
+        MENUITEM "Open", 0                                                      //  will add some functionality
+        MENUITEM "Save", 0                                                      //  soon... maybe...
+        MENUITEM SEPARATOR
+        MENUITEM "Exit", ID_FILE_EXIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About", ID_HELP_ABOUT
+    END
+END
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "Application.manifest"           // Linkind the manifest
+
+1 VERSIONINFO                                                                   // Executable version information.
+FILEVERSION 1, 0, 0, 0
+PRODUCTVERSION 1, 0, 0, 0
+FILEFLAGSMASK 0x17L
+
+#ifdef _DEBUG
+    FILEFLAGS 0x1L
+#else
+    FILEFLAGS 0x0L
+#endif
+
+FILEOS 0x4L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "CompanyName", "TUM"
+            VALUE "FileDescription", "A simple taks tracking application"
+            VALUE "FileVersion", "1, 0, 0, 0"
+            VALUE "InternalName", "TaskTracker"
+            VALUE "LegalCopyright", "©2013 Mihai Iachimovschi"
+            VALUE "OriginalFilename", "TaskTracker.exe"
+            VALUE "ProductName", "Task Tracker Plus"
+            VALUE "ProductVersion", "1, 0, 0, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+
+IDD_ABOUTDIALOG DIALOGEX 0, 0, 150, 55                                          // Designing the abot dialog.
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    ICON            IDI_APPICON, IDC_STATIC, 10, 5, 48, 48
+    LTEXT           "Simple Task-Manager Application.", IDC_STATIC, 35, 5, 150, 10
+    LTEXT           "©2013 Mihai Iachimovschi", IDC_STATIC, 35, 15, 150, 10
+    DEFPUSHBUTTON   "OK", IDOK, 90, 30, 50, 15, WS_GROUP
+END
+
+IDR_ACCELERATOR ACCELERATORS
+BEGIN
+    "A", ID_HELP_ABOUT, VIRTKEY, ALT, NOINVERT
+END
