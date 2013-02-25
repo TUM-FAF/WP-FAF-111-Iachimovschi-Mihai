@@ -78,12 +78,16 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     char * message = new char[100];
     char * placeholder = new char[26];
     placeholder = "Type here the new task...";
+    int screenW;
+    int screenH;
+    HBRUSH color;
+    char * itemCnt;
 
     switch(msg)
     {
         case WM_CREATE:
-            int screenW = GetSystemMetrics(SM_CXSCREEN);
-            int screenH = GetSystemMetrics(SM_CYSCREEN);
+            screenW = GetSystemMetrics(SM_CXSCREEN);
+            screenH = GetSystemMetrics(SM_CYSCREEN);
             GetWindowRect(hwnd, &rect);
             SetWindowPos(
                     hwnd, 0,
@@ -145,23 +149,24 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             switch (LOWORD(wParam))
             {
                 case IDC_COUNT_BUTTON:
-                    sprintf(message, "There are %d tasks in the list.", items);
-                    if(HIWORD(wParam) == BN_CLICKED)
+                    if(HIWORD(wParam) == BN_CLICKED){
+                        sprintf(message, "There are %d tasks in the list.", items);
                         MessageBox(hwnd, message, "Tasks counter", MB_ICONINFORMATION);
+                    }
                     break;
 
                 case IDC_ADD_BUTTON:
-                    textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
-                    char *text = new char[textSize];
-                    SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)text);
-                    if(strlen(text) && strcmp(text, placeholder))
+                    textSize = SendMessage(hwndTextInput, WM_GETTEXT, 100, (LPARAM)message);
+                    message[textSize] = _T('\0');
+
+                    if(strlen(message) && strcmp(message, placeholder))
                     {
                         char *item = new char[200];
                         if(items)
                             strcpy(item, "\r\n - ");
                         else
                             strcpy(item, " - ");                                // Managing the new string
-                        strcat(item, text);
+                        strcat(item, message);
                         SendMessage(hwndTextList, EM_REPLACESEL,
                             TRUE, (LPARAM)item);                                // Appending a new item in the list
                         SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
@@ -175,13 +180,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                         focused = 0;
                     }
                     RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE);
-                    delete [] text;
                     break;
                 case IDC_TEXT_INPUT:
                     if(HIWORD(wParam) == EN_SETFOCUS)
                     {
-                        textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
-                        SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)message);
+                        textSize = SendMessage(hwndTextInput, WM_GETTEXT, 100, (LPARAM)message);
+                        message[textSize] = _T('\0');
+
                         if(!strcmp(message, placeholder))
                         {
                             SendMessage(hwndTextInput, WM_SETTEXT, TRUE,(LPARAM)"");// Clearing the text input
@@ -191,8 +196,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     }
                     else if(HIWORD(wParam) == EN_KILLFOCUS)
                     {
-                        textSize = SendMessage(hwndTextInput, EM_GETLIMITTEXT, 0, 0);
-                        SendMessage(hwndTextInput, WM_GETTEXT, textSize, (LPARAM)message);
+                        textSize = SendMessage(hwndTextInput, WM_GETTEXT, 100, (LPARAM)message);
+                        message[textSize] = _T('\0');
+
                         if(!strcmp(message, ""))
                         {
                             SendMessage(
@@ -210,7 +216,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_CTLCOLOREDIT:
             if(GetDlgCtrlID((HWND)lParam) == IDC_TEXT_INPUT)
             {
-                HBRUSH color;
                 hdc = (HDC)wParam;                                              //Get handles
                 if(focused)
                 {
@@ -237,7 +242,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             SetTextColor(hdc, RGB(152, 0, 16));                                 // Setting the text color to a dark red
             DrawText(hdc, title, -1, &rect, DT_CENTER | DT_TOP);                // Drawind the text on top aligning it to center
             SetTextColor(hdc, RGB(0, 100, 0));                                  // Setting color to a dark green
-            char * itemCnt = new char[10];
+            itemCnt = new char[10];
             sprintf(itemCnt, "%d  ", items);                                    // Creating the counter string
             DrawText(hdc, itemCnt, -1, &rect, DT_RIGHT | DT_TOP);               // Drawing the text on top aligning it to right
             SetTextColor(hdc, RGB(0, 0, 0));                                    // Resetting the color to black
