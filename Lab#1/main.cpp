@@ -149,9 +149,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             switch (LOWORD(wParam))
             {
                 case IDC_COUNT_BUTTON:
-                    sprintf(message, "There are %d tasks in the list.", items);
-                    if(HIWORD(wParam) == BN_CLICKED)
+                    if(HIWORD(wParam) == BN_CLICKED){
+                        sprintf(message, "There are %d tasks in the list.", items);
                         MessageBox(hwnd, message, "Tasks counter", MB_ICONINFORMATION);
+                    }
                     break;
 
                 case IDC_ADD_BUTTON:
@@ -197,7 +198,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     {
                         textSize = SendMessage(hwndTextInput, WM_GETTEXT, 100, (LPARAM)message);
                         message[textSize] = _T('\0');
-                        
+
                         if(!strcmp(message, ""))
                         {
                             SendMessage(
