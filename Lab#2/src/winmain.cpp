@@ -133,7 +133,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 (DWORD)NULL,
                 TEXT("listbox"),
                 "",
-                WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | WS_BORDER,
+                WS_CHILD | WS_VISIBLE | LBS_STANDARD | ES_AUTOVSCROLL | WS_BORDER,
                 5, 20,
                 382, 150,
                 hwnd,
@@ -224,6 +224,16 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 case ID_FILE_EXIT:
                     SendMessage(hwnd, WM_CLOSE, 0, 0);
                     break;
+
+                case IDC_TASK_LIST:
+                    if(HIWORD(wParam) == LBN_SELCHANGE)
+                    {
+                        int index = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
+                        SendMessage(hwndList, LB_GETTEXT, (WPARAM)index, (LPARAM)message);
+                        MessageBox(hwnd, message, "title", MB_OK);
+                        return true;
+                    }
+                    break;
             }
             break;
         case WM_CTLCOLOREDIT:
@@ -254,11 +264,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             case WM_CTLCOLORSTATIC:
                 if ((HWND)lParam == GetDlgItem(hwnd, IDC_TEXT_COUNTER))
                 {
-                    color = CreateSolidBrush(RGB(255, 255, 255));
-                    SetBkColor(hdc, (LONG)color);                               // Backround color for EditBox
+                    hdc = (HDC)wParam;                                          //Get handles
                     SetBkMode((HDC)wParam, TRANSPARENT);
                     SetTextColor((HDC)wParam, RGB(0, 100, 0));
-                    return (BOOL)CreateSolidBrush (GetSysColor(COLOR_MENU));
+                    return (BOOL)GetStockObject(NULL_BRUSH);
                 }
                 break;
 
