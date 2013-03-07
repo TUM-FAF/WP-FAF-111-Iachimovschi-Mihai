@@ -49,7 +49,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
     hwnd = CreateWindowEx(
         (DWORD)NULL,
         szClassName,
-        "Lab#1",                                                                // Window title
+        "Lab#2",                                                                // Window title
         WS_OVERLAPPEDWINDOW | WS_BORDER,                                        // Basic window style
         CW_USEDEFAULT, CW_USEDEFAULT,                                           // Set starting point to default value
         520, 250,                                                               // Set all the dimensions to default value
