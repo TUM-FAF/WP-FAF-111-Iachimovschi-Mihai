@@ -1,7 +1,7 @@
 #include <windows.h>
 #include "../include/resource.h"
 
-IDI_APPICON ICON "Application.ico"                                              // Win32 application icon. Found on Google. TODO: To draw a nice icon.
+IDI_APPICON ICON "Application.ico"                                              // Win32 application icon. Found on Google.
 
 IDR_MAINMENU MENU                                                               // The menu
 BEGIN
