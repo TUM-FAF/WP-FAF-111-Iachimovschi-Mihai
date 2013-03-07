@@ -46,9 +46,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
         (DWORD)NULL,
         szClassName,
         "Lab#1",                                                                // Window title
-        WS_OVERLAPPEDWINDOW | WS_BORDER,                                 // Basic window style
+        WS_OVERLAPPEDWINDOW | WS_BORDER,                                        // Basic window style
         CW_USEDEFAULT, CW_USEDEFAULT,                                           // Set starting point to default value
-        400, 315,                                                               // Set all the dimensions to default value
+        520, 290,                                                               // Set all the dimensions to default value
         NULL,                                                                   //no parent window
         NULL,                                                                   //no menu
         hInst,
@@ -106,26 +106,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,                                                          // the instance of your application
                 NULL);
 
-            /*hwndCountButton = CreateWindowEx(
-                (DWORD)NULL,
-                TEXT("button"),                                                 // The class name required is button
-                TEXT("Count all tracked tasks"),                                // the caption of the button
-                WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,                          // the styles
-                5, 200,                                                         // the left and top co-ordinates
-                382, 30,                                                        // width and height
-                hwnd,                                                           // parent window handle
-                (HMENU)IDC_COUNT_BUTTON,                                        // the ID of your button
-                hInst,                                                          // the instance of your application
-                NULL);                                                          // extra bits you dont really need
-*/
-
             hwndCurrentTask = CreateWindowEx(
                 (DWORD)NULL,
                 TEXT("static"),
                 TEXT("AE"),
-                WS_CHILD | WS_VISIBLE,
-                5, 200,
-                382, 20,
+                WS_CHILD | WS_VISIBLE | SS_LEFT,
+                392, 20,
+                115, 150,
                 hwnd,
                 (HMENU)IDC_CURRENT_TASK,
                 hInst,
@@ -135,7 +122,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 (DWORD)NULL,
                 TEXT("edit"),                                                   // The class name required is edit
                 TEXT(placeholder),                                              // Default text.
-                WS_VISIBLE | WS_CHILD | WS_BORDER,                              // Textbox styles
+                WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL,             // Textbox styles
                 5, 175,                                                         // the left and top co-ordinates
                 242, 20,                                                        // width and height
                 hwnd,                                                           // parent window handle
@@ -172,7 +159,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 TEXT("scrollbar"),
                 (LPSTR)NULL,
                 WS_CHILD | WS_VISIBLE | SBS_HORZ,
-                5, 225,
+                5, 200,
                 382, 30,
                 hwnd,
                 (HMENU)IDC_MANUAL_SCROLL,
