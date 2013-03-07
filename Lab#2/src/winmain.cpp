@@ -67,7 +67,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    static HWND hwndAddButton, hwndCountButton, hwndTextInput, hwndList, hwndTextCounter, hwndManualScroll;
+    static HWND hwndAddButton, hwndCurrentTask, hwndTextInput, hwndList, hwndTextCounter, hwndManualScroll;
     RECT rect ;
     PAINTSTRUCT ps ;
     HDC hdc;
@@ -106,7 +106,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,                                                          // the instance of your application
                 NULL);
 
-            hwndCountButton = CreateWindowEx(
+            /*hwndCountButton = CreateWindowEx(
                 (DWORD)NULL,
                 TEXT("button"),                                                 // The class name required is button
                 TEXT("Count all tracked tasks"),                                // the caption of the button
@@ -117,6 +117,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 (HMENU)IDC_COUNT_BUTTON,                                        // the ID of your button
                 hInst,                                                          // the instance of your application
                 NULL);                                                          // extra bits you dont really need
+*/
+
+            hwndCurrentTask = CreateWindowEx(
+                (DWORD)NULL,
+                TEXT("static"),
+                TEXT("AE"),
+                WS_CHILD | WS_VISIBLE,
+                5, 200,
+                382, 20,
+                hwnd,
+                (HMENU)IDC_CURRENT_TASK,
+                hInst,
+                NULL);
 
             hwndTextInput = CreateWindowEx(
                 (DWORD)NULL,
@@ -159,7 +172,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 TEXT("scrollbar"),
                 (LPSTR)NULL,
                 WS_CHILD | WS_VISIBLE | SBS_HORZ,
-                5, 235,
+                5, 225,
                 382, 30,
                 hwnd,
                 (HMENU)IDC_MANUAL_SCROLL,
@@ -170,7 +183,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_COMMAND:
             switch (LOWORD(wParam))
             {
-                case IDC_COUNT_BUTTON:
+                /*case IDC_COUNT_BUTTON:
                     if(HIWORD(wParam) == BN_CLICKED)
                     {
                         items = SendMessage(hwndList, LB_GETCOUNT, 0, 0);
@@ -179,7 +192,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                         ScrollWindowEx(hwnd, -20, -20, NULL, NULL, NULL, NULL, 2 );
                     }
                     break;
-
+*/
                 case IDC_ADD_BUTTON:
                     textSize = SendMessage(hwndTextInput, WM_GETTEXT, 100, (LPARAM)message);
                     message[textSize] = _T('\0');
@@ -241,9 +254,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     switch(HIWORD(wParam))
                     {
                         case LBN_SELCHANGE:
-                            index = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
-                            SendMessage(hwndList, LB_GETTEXT, (WPARAM)index, (LPARAM)message);
-                            //MessageBox(hwnd, message, "title", MB_OK);
+                            RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE);
                             break;
 
                         case LBN_DBLCLK:
@@ -281,7 +292,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             break;
 
             case WM_CTLCOLORSTATIC:
-                if ((HWND)lParam == GetDlgItem(hwnd, IDC_TEXT_COUNTER))
+                if ((HWND)lParam == GetDlgItem(hwnd, IDC_TEXT_COUNTER)
+                 || (HWND)lParam == GetDlgItem(hwnd, IDC_CURRENT_TASK))
                 {
                     hdc = (HDC)wParam;                                          //Get handles
                     SetBkMode((HDC)wParam, TRANSPARENT);
@@ -301,6 +313,16 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             items = SendMessage(hwndList, LB_GETCOUNT, 0, 0);
             sprintf(itemCnt, "%d", items);                                      // Creating the counter string
             SetWindowText(hwndTextCounter, itemCnt);                            // Showing the counter
+
+            index = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
+            if(index != -1)
+            {
+                SendMessage(hwndList, LB_GETTEXT, (WPARAM)index, (LPARAM)message);
+                SetWindowText(hwndCurrentTask, message);
+            }
+            else
+                SetWindowText(hwndCurrentTask, "No task selected");
+
             SetTextColor(hdc, RGB(0, 0, 0));                                    // Resetting the color to black
             EndPaint(hwnd, &ps);
             break;
