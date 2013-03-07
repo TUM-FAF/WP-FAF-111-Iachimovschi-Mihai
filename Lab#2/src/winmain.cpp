@@ -9,8 +9,9 @@
 INT_PTR CALLBACK AboutDialogProc(HWND, UINT, WPARAM, LPARAM);                   // About dialog
 LPSTR szClassName = "Lab2Class";
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);                   // Window Procedure
+
 HINSTANCE hInst;
-int focused = 0;
+int focused = 0, idFocus;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)
 {
@@ -73,20 +74,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    static HWND hwndAddButton, hwndCurrentTask, hwndTextInput, hwndList, hwndTextCounter, hwndManualScroll;
-    RECT rect ;
-    PAINTSTRUCT ps ;
+    static HWND hwndAddButton, hwndCurrentTask, hwndTextInput, hwndList, hwndTextCounter;
+    static HWND hwndScroll[3], hwndScrollValue[3];
+    RECT rect;
+    PAINTSTRUCT ps;
     HDC hdc;
     LPSTR title = TEXT("  A simple task tracker.");
     LRESULT textSize;
-    HBRUSH color;
+    HBRUSH color, hBrushStatic;
     char * message = new char[100];
     char * placeholder = new char[26];
     placeholder = "Type here the new task...";
     int screenW;
     int screenH;
     char * itemCnt;
-    int index, items;
+    int index, items, i, cyChar;
+    static int colors[3];                                                        // Red, Green, Blue [0, 255]
+    static COLORREF crPrim[3] = {RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255)};
+    COLORREF taskColor = RGB(0, 0, 0);
+
 
     switch(msg)
     {
@@ -118,7 +124,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 TEXT("AE"),
                 WS_CHILD | WS_VISIBLE | SS_LEFT,
                 392, 20,
-                115, 150,
+                115, 40,
                 hwnd,
                 (HMENU)IDC_CURRENT_TASK,
                 hInst,
@@ -160,17 +166,37 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,
                 NULL);
 
-            hwndManualScroll = CreateWindowEx(
-                (DWORD)NULL,
-                TEXT("scrollbar"),
-                (LPSTR)NULL,
-                WS_CHILD | WS_VISIBLE | SBS_HORZ,
-                5, 200,
-                382, 30,
-                hwnd,
-                (HMENU)IDC_MANUAL_SCROLL,
-                hInst,
-                NULL);
+            for (i = 0 ; i < 3 ; i++)
+            {
+                hwndScroll[i] = CreateWindowEx(
+                    (DWORD)NULL,
+                    TEXT ("scrollbar"),
+                    NULL,
+                    WS_CHILD | WS_VISIBLE | SBS_VERT,
+                    (400 + i * 40), 65,
+                    20, 100,
+                    hwnd,
+                    (HMENU)(105 + i),                                           // Defined in resource.h IDC_{COLOR}_SCROLL 105-107
+                    hInst,
+                    NULL) ;
+
+                SetScrollRange(hwndScroll[i], SB_CTL, 0, 255, FALSE);
+                SetScrollPos(hwndScroll[i], SB_CTL, 255 - 0, FALSE);            // 255 - 0 because we use zero as coordinate
+
+                hwndScrollValue[i] = CreateWindowEx(
+                    (DWORD)NULL,
+                    TEXT ("static"),
+                    TEXT ("0"),
+                    WS_CHILD | WS_VISIBLE | SS_CENTER,
+                    (395 + i * 40), 175,
+                    30, 20,
+                    hwnd,
+                    (HMENU)(108 + i),
+                    hInst,
+                    NULL);
+            }
+            hBrushStatic = CreateSolidBrush(GetSysColor(COLOR_BTNHIGHLIGHT));
+            cyChar = HIWORD(GetDialogBaseUnits ());
             break;
 
         case WM_COMMAND:
@@ -289,19 +315,29 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             }
             break;
 
-            case WM_CTLCOLORSTATIC:
-                if ((HWND)lParam == GetDlgItem(hwnd, IDC_TEXT_COUNTER))
-                {
-                    hdc = (HDC)wParam;                                          //Get handles
-                    SetBkMode((HDC)wParam, TRANSPARENT);
-                    SetTextColor((HDC)wParam, RGB(0, 100, 0));
-                    return (BOOL)GetStockObject(NULL_BRUSH);
-                }
+        case WM_CTLCOLORSTATIC:
+            if ((HWND)lParam == GetDlgItem(hwnd, IDC_TEXT_COUNTER))
+            {
+                hdc = (HDC)wParam;                                              //Get handles
+                SetBkMode((HDC)wParam, TRANSPARENT);
+                SetTextColor((HDC)wParam, RGB(0, 100, 0));
+                return (BOOL)GetStockObject(NULL_BRUSH);
+            }
+            if(((HWND)lParam == GetDlgItem(hwnd, IDC_RED_LABEL))
+                || ((HWND)lParam == GetDlgItem(hwnd, IDC_GREEN_LABEL))
+                || ((HWND)lParam == GetDlgItem(hwnd, IDC_BLUE_LABEL)))
+            {
+                SetBkMode((HDC)wParam, TRANSPARENT);
+                return (BOOL)GetStockObject(NULL_BRUSH);
+            }
 
-                if((HWND)lParam == GetDlgItem(hwnd, IDC_CURRENT_TASK))
-                    SetBkMode((HDC)wParam, TRANSPARENT);
-                    return (BOOL)GetStockObject(NULL_BRUSH);
-                break;
+            if((HWND)lParam == GetDlgItem(hwnd, IDC_CURRENT_TASK))
+            {
+                SetBkMode((HDC)wParam, TRANSPARENT);
+                SetTextColor((HDC)wParam, taskColor);
+                return (BOOL)GetStockObject(NULL_BRUSH);
+            }
+            break;
 
         case WM_PAINT:
             hdc = BeginPaint(hwnd, &ps);
@@ -328,6 +364,60 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             SetTextColor(hdc, RGB(0, 0, 0));                                    // Resetting the color to black
             EndPaint(hwnd, &ps);
             break;
+
+        case WM_SETFOCUS :
+            SetFocus (hwndScroll[idFocus]);
+            return 0;
+
+        case WM_VSCROLL :
+            i = GetWindowLong ((HWND) lParam, GWL_ID) - 105;
+
+            switch (LOWORD (wParam))
+            {
+                case SB_PAGEDOWN:
+                    colors[i] -= 15;
+                case SB_LINEDOWN:
+                    colors[i] = max(0, colors[i] - 1);
+                    break;
+
+                case SB_PAGEUP:
+                    colors[i] += 15;
+                case SB_LINEUP:
+                    colors[i] = min(255, colors[i] + 1);
+                    break;
+
+                case SB_TOP:
+                    colors[i] = 255;
+                    break;
+
+                case SB_BOTTOM:
+                    colors[i] = 0;
+                    break;
+
+                case SB_THUMBPOSITION:
+                case SB_THUMBTRACK:
+                    colors[i] = 255 - HIWORD (wParam);
+                    break;
+
+                default:
+                    break;
+            }
+            SetScrollPos(hwndScroll[i], SB_CTL, 255 - colors[i], TRUE) ;
+            sprintf(message, "%d", colors[i]) ;
+            SetWindowText (hwndScrollValue[i], message) ;
+            taskColor = RGB(colors[1], colors[2], colors[3]);
+
+            GetClientRect(hwndScrollValue[i], &rect);
+            InvalidateRect(hwndScrollValue[i], &rect, TRUE) ;
+            MapWindowPoints(hwndScrollValue[i], hwnd, (POINT *) &rect, 2);
+            RedrawWindow(hwnd, &rect, NULL, RDW_ERASE | RDW_INVALIDATE);
+
+            return 0 ;
+
+        case WM_CTLCOLORSCROLLBAR :
+            i = GetWindowLong((HWND)lParam, GWL_ID) - 105;
+            return (LRESULT)CreateSolidBrush(crPrim[i]);
+
         case WM_CLOSE:
             if(MessageBox(hwnd, "Are you sure that you want to close this task tracker?", "Lab#1", MB_OKCANCEL | MB_ICONWARNING) == IDOK)
                 DestroyWindow(hwnd);
@@ -365,3 +455,4 @@ INT_PTR CALLBACK AboutDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
     }
     return (INT_PTR) FALSE;
 }
+
