@@ -10,7 +10,7 @@ INT_PTR CALLBACK AboutDialogProc(HWND, UINT, WPARAM, LPARAM);                   
 LPSTR szClassName = "Lab2Class";
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);                   // Window Procedure
 HINSTANCE hInst;
-int items, focused = 0;
+int focused = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)
 {
@@ -29,7 +29,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
     /* Use default icon and mouse-pointer */
     wnd.hIcon = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 0, 0, LR_SHARED);
     wnd.hIconSm = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 16, 16, LR_SHARED);
-    wnd.hCursor = LoadCursor(NULL, IDC_ARROW);                                  // Default arrow mouse cursor
+    wnd.hCursor = LoadCursor(NULL, IDC_HAND);                                   // Default arrow mouse cursor
     wnd.lpszMenuName = MAKEINTRESOURCE(IDR_MAINMENU);                           // No menu
     wnd.cbClsExtra = 0;                                                         // No extra bytes after the window class
     wnd.cbWndExtra = 0;                                                         //  structure or the window instance
@@ -48,7 +48,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
         "Lab#1",                                                                // Window title
         WS_OVERLAPPEDWINDOW | WS_BORDER,                                 // Basic window style
         CW_USEDEFAULT, CW_USEDEFAULT,                                           // Set starting point to default value
-        400, 280,                                                               // Set all the dimensions to default value
+        400, 315,                                                               // Set all the dimensions to default value
         NULL,                                                                   //no parent window
         NULL,                                                                   //no menu
         hInst,
@@ -67,7 +67,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    static HWND hwndAddButton, hwndCountButton, hwndTextInput, hwndList, hwndTextCounter;
+    static HWND hwndAddButton, hwndCountButton, hwndTextInput, hwndList, hwndTextCounter, hwndManualScroll;
     RECT rect ;
     PAINTSTRUCT ps ;
     HDC hdc;
@@ -80,6 +80,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     int screenW;
     int screenH;
     char * itemCnt;
+    int index, items;
 
     switch(msg)
     {
@@ -153,7 +154,17 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,
                 NULL);
 
-
+            hwndManualScroll = CreateWindowEx(
+                (DWORD)NULL,
+                TEXT("scrollbar"),
+                (LPSTR)NULL,
+                WS_CHILD | WS_VISIBLE | SBS_HORZ,
+                5, 235,
+                382, 30,
+                hwnd,
+                (HMENU)IDC_MANUAL_SCROLL,
+                hInst,
+                NULL);
             break;
 
         case WM_COMMAND:
@@ -162,8 +173,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 case IDC_COUNT_BUTTON:
                     if(HIWORD(wParam) == BN_CLICKED)
                     {
+                        items = SendMessage(hwndList, LB_GETCOUNT, 0, 0);
                         sprintf(message, "There are %d tasks in the list.", items);
                         MessageBox(hwnd, message, "Tasks counter", MB_OK);
+                        ScrollWindowEx(hwnd, -20, -20, NULL, NULL, NULL, NULL, 2 );
                     }
                     break;
 
@@ -179,7 +192,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                         SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)item);
                         delete [] item;                                         // Managing the memory
 
-                        items += 1;                                             // Incrementing the number of items
                         SendMessage(
                             hwndTextInput,
                             WM_SETTEXT,
@@ -226,12 +238,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     break;
 
                 case IDC_TASK_LIST:
-                    if(HIWORD(wParam) == LBN_SELCHANGE)
+                    switch(HIWORD(wParam))
                     {
-                        int index = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
-                        SendMessage(hwndList, LB_GETTEXT, (WPARAM)index, (LPARAM)message);
-                        MessageBox(hwnd, message, "title", MB_OK);
-                        return true;
+                        case LBN_SELCHANGE:
+                            index = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
+                            SendMessage(hwndList, LB_GETTEXT, (WPARAM)index, (LPARAM)message);
+                            //MessageBox(hwnd, message, "title", MB_OK);
+                            break;
+
+                        case LBN_DBLCLK:
+                            index = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
+                            SendMessage(hwndList, LB_DELETESTRING, (WPARAM)index, 0);
+                            RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE);
+                            break;
                     }
                     break;
             }
@@ -279,6 +298,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             DrawText(hdc, title, -1, &rect, DT_LEFT | DT_TOP);                  // Drawind the text on top aligning it to center
             SetTextColor(hdc, RGB(0, 100, 0));                                  // Setting color to a dark green
             itemCnt = new char[10];
+            items = SendMessage(hwndList, LB_GETCOUNT, 0, 0);
             sprintf(itemCnt, "%d", items);                                      // Creating the counter string
             SetWindowText(hwndTextCounter, itemCnt);                            // Showing the counter
             SetTextColor(hdc, RGB(0, 0, 0));                                    // Resetting the color to black
