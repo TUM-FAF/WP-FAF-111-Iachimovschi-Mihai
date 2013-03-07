@@ -18,6 +18,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
     MSG msg;
     HWND hwnd;
     hInst = hInstance;
+    HACCEL hAccel;
 
     /* The Window Structure */
     wnd.hInstance = hInst;
@@ -35,6 +36,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
     wnd.cbWndExtra = 0;                                                         //  structure or the window instance
 
     wnd.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
+
+    hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR));     // Loading the accelerators
 
     if(!RegisterClassEx(&wnd))                                                  // Register the WNDCLASSEX
     {
@@ -59,8 +62,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
 
     while(GetMessage(&msg, NULL, 0, 0))                                         //message loop
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (! TranslateAccelerator(hwnd, hAccel, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
     return msg.wParam;
 }
@@ -251,6 +257,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                             break;
                     }
                     break;
+
+                case ID_DATA_CLEAR:
+                    SendMessage(hwndList, LB_RESETCONTENT, 0, 0);
+                    RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE);
+                    break;
             }
             break;
         case WM_CTLCOLOREDIT:
@@ -279,14 +290,17 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             break;
 
             case WM_CTLCOLORSTATIC:
-                if ((HWND)lParam == GetDlgItem(hwnd, IDC_TEXT_COUNTER)
-                 || (HWND)lParam == GetDlgItem(hwnd, IDC_CURRENT_TASK))
+                if ((HWND)lParam == GetDlgItem(hwnd, IDC_TEXT_COUNTER))
                 {
                     hdc = (HDC)wParam;                                          //Get handles
                     SetBkMode((HDC)wParam, TRANSPARENT);
                     SetTextColor((HDC)wParam, RGB(0, 100, 0));
                     return (BOOL)GetStockObject(NULL_BRUSH);
                 }
+
+                if((HWND)lParam == GetDlgItem(hwnd, IDC_CURRENT_TASK))
+                    SetBkMode((HDC)wParam, TRANSPARENT);
+                    return (BOOL)GetStockObject(NULL_BRUSH);
                 break;
 
         case WM_PAINT:

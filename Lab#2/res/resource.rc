@@ -1,21 +1,25 @@
 #include <windows.h>
 #include "../include/resource.h"
 
-IDI_APPICON ICON "Application.ico"                                              // Win32 application icon. Found on Google.
+IDI_APPICON ICON "Application.ico"                                              // Win32 application icon. Found on IconFinder.
 
 IDR_MAINMENU MENU                                                               // The menu
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "New", 0                                                       // Simple placeholder
-        MENUITEM "Open", 0                                                      //  will add some functionality
-        MENUITEM "Save", 0                                                      //  soon... maybe...
+        MENUITEM "New", 0, GRAYED
+        MENUITEM "Open", 0, GRAYED
+        MENUITEM "Save", 0, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "Exit", ID_FILE_EXIT
+        MENUITEM "&Exit\aAlt+F4", ID_FILE_EXIT
+    END
+    POPUP "&Data"
+    BEGIN
+        MENUITEM "&Clear\aAlt+C", ID_DATA_CLEAR
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About", ID_HELP_ABOUT
+        MENUITEM "&About\aAlt+A", ID_HELP_ABOUT
     END
 END
 
@@ -70,5 +74,6 @@ END
 
 IDR_ACCELERATOR ACCELERATORS
 BEGIN
-    "A", ID_HELP_ABOUT, VIRTKEY, ALT, NOINVERT
+    "A", ID_HELP_ABOUT, VIRTKEY, ALT, NOINVERT                                  // Alt+A shortcut
+    "C", ID_DATA_CLEAR, VIRTKEY, ALT, NOINVERT                                  // Alt+C shortcut
 END
