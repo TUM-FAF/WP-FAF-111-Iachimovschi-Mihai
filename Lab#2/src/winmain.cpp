@@ -51,7 +51,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
         "Lab#1",                                                                // Window title
         WS_OVERLAPPEDWINDOW | WS_BORDER,                                        // Basic window style
         CW_USEDEFAULT, CW_USEDEFAULT,                                           // Set starting point to default value
-        520, 290,                                                               // Set all the dimensions to default value
+        520, 250,                                                               // Set all the dimensions to default value
         NULL,                                                                   //no parent window
         NULL,                                                                   //no menu
         hInst,
@@ -319,6 +319,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             if(index != -1)
             {
                 SendMessage(hwndList, LB_GETTEXT, (WPARAM)index, (LPARAM)message);
+                message += 3;                                                   // Skipping first three characters of the string
                 SetWindowText(hwndCurrentTask, message);
             }
             else
