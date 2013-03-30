@@ -17,23 +17,24 @@ HINSTANCE hInst;
 
 void updateColorControls(HDC, COLORREF, int, int);
 
-COLORREF g_rgbBackground=RGB(0,0,0);
-COLORREF g_rgbCustom[16] = {0};
-
-void colorSelect(HWND hwnd)
+COLORREF fillColor = RGB(255, 255, 255);
+COLORREF borderColor = RGB(0, 0, 0);
+COLORREF colorSelect(HWND hwnd, COLORREF color)
 {
+    COLORREF g_rgbCustom[16] = {0};
     CHOOSECOLOR cc = {sizeof(CHOOSECOLOR)};
 
     cc.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
     cc.hwndOwner = hwnd;
-    cc.rgbResult = g_rgbBackground;
+    cc.rgbResult = color;
     cc.lpCustColors = g_rgbCustom;
 
     if(ChooseColor(&cc))
     {
-        g_rgbBackground = cc.rgbResult;
+        color = cc.rgbResult;
     }
     //InvalidateRect(hwnd, NULL,FALSE);
+    return color;
 }
 
 // Redirecting child messages to parent window
@@ -110,13 +111,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     static HWND hwndBorderWidth;
     static HWND hwndEraserWidth;
     static HWND hwndResetButton;
-
     static HWND hwndConfigGroup;
     RECT rect ;
     int screenW;
     int screenH;
     PAINTSTRUCT ps;
-    HDC hdc;
+    HDC hdc = GetDC(hwnd);
+    int xMouse, yMouse;
 
     // Color preview rectangles
     HBRUSH hBrush;
@@ -132,8 +133,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     hbmpDesignerImage = (HBITMAP)LoadImage(hInst, "designer.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     GetObject(hbmpDesignerImage, sizeof(bitmap), &bitmap);
 
-    // Drawing area rect
     static RECT drawingArea = {170, 17, 780, 475};
+    static RECT fillColorRect = {xFillPreview, yFillPreview, xFillPreview + 25, yFillPreview + 20};
+    static RECT borderColorRect = {xStrokePreview, yStrokePreview, xStrokePreview + 25, yStrokePreview + 20};
 
     switch(msg)
     {
@@ -358,7 +360,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     if(HIWORD(wParam) == BN_CLICKED)
                     {
                         // Temporary. Proof of concept.
-                        colorSelect(hwnd);
+                        //colorSelect(hwnd, tmpColor);
                     }
                     break;
             }
@@ -368,10 +370,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             hdc = BeginPaint(hwnd, &ps);
 
             // Fill color preview rectangle
-            updateColorControls(hdc, RGB(255, 255, 255), xFillPreview, yFillPreview);
+            updateColorControls(hdc, fillColor, xFillPreview, yFillPreview);
 
             // Stroke color preview rectangle
-            updateColorControls(hdc, RGB(0, 0, 0), xStrokePreview, yStrokePreview);
+            updateColorControls(hdc, borderColor, xStrokePreview, yStrokePreview);
 
             // Blank draw area
             SelectObject(hdc, CreatePen(PS_SOLID, 1, RGB(0,0,0)));
@@ -386,10 +388,31 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
             EndPaint(hwnd, &ps);
             break;
+
+        case WM_LBUTTONDOWN:
+            xMouse = GET_X_LPARAM(lParam);
+            yMouse = GET_Y_LPARAM(lParam);
+
+            if(xMouse >= fillColorRect.left && xMouse <= fillColorRect.right)
+            {
+                if(yMouse >= fillColorRect.top && yMouse <= fillColorRect.bottom)
+                {
+                    fillColor = colorSelect(hwnd, fillColor);
+                    updateColorControls(hdc, fillColor, xFillPreview, yFillPreview);
+                }
+                else if(yMouse >= borderColorRect.top && yMouse <= borderColorRect.bottom)
+                {
+                    borderColor = colorSelect(hwnd, borderColor);
+                    updateColorControls(hdc, borderColor, xFillPreview, yFillPreview);
+                }
+            }
+            break;
+
         case WM_CLOSE:
             if(MessageBox(hwnd, "Are you sure that you want to close this task tracker?", "Lab#1", MB_YESNO) == IDYES)
                 DestroyWindow(hwnd);
             break;
+
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
@@ -400,7 +423,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     return 0;
 }
 
-void updateColorControls(HDC hdc, COLORREF rgb, int xLeft, int yTop) {
+void updateColorControls(HDC hdc, COLORREF rgb, int xLeft, int yTop)
+{
     HBRUSH hBrush = CreateSolidBrush(rgb);
     HPEN hPen = CreatePen(PS_INSIDEFRAME, 2, RGB(10, 40, 140));
 
