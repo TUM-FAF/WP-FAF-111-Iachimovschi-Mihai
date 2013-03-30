@@ -9,7 +9,6 @@
 #define IDB_ERASER_TOOL 105
 #define IDB_FILL_CHECK 106
 #define IDB_BORDER_WIDTH 107
-#define IDB_RESET_BUTTON 108
 #define IDB_BEZIER_TOOL 109
 
 LPSTR szClassName = "Lab3Class";
@@ -107,13 +106,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     static HWND hwndToolsGroup;
-    static HWND hwndPencilTool, hwndEllipseTool, hwndRectangleTool;
+    static HWND hwndPencilTool;
+    static HWND hwndEllipseTool;
     static HWND hwndLineTool;
     static HWND hwndEraserTool;
     static HWND hwndFillCheck;
     static HWND hwndBorderWidth;
     static HWND hwndEraserWidth;
-    static HWND hwndResetButton;
+    static HWND hwndRectangleTool;
     static HWND hwndConfigGroup;
     static HWND hwndBezierTool;
     RECT rect ;
@@ -124,7 +124,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     int xMouse, yMouse;
 
     // Color preview rectangles
-    HBRUSH hBrush;
     int xFillPreview   = 115;
     int yFillPreview   = 200;
     int xStrokePreview = 115;
@@ -140,8 +139,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     static RECT drawingArea = {170, 17, 780, 475};
     static RECT fillColorRect = {xFillPreview, yFillPreview, xFillPreview + 25, yFillPreview + 20};
     static RECT borderColorRect = {xStrokePreview, yStrokePreview, xStrokePreview + 25, yStrokePreview + 20};
+    static RECT gradientRect = {25, 300, 140, 330};
+    static RECT tempRect;
 
     // Drawing stuff
+    HBRUSH hBrush;
     static POINT pointPen;
     POINT point;
     HPEN linePen;
@@ -367,19 +369,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 hInst,
                 NULL);
 
-            // Reset Button
-            hwndResetButton = CreateWindowEx(
-                (DWORD)WS_EX_CONTROLPARENT,
-                "Button",
-                "Reset",
-                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_NOTIFY,
-                10, 140,
-                120, 30,
-                hwndConfigGroup,
-                (HMENU)IDB_RESET_BUTTON,
-                hInst,
-                NULL);
-
             // Redirecting child messages to parent window
             GroupBoxProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hwndConfigGroup, GWLP_WNDPROC));
             SetWindowLongPtr(hwndConfigGroup, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(GroupRelay));
@@ -391,12 +380,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_COMMAND:
             switch (LOWORD(wParam))
             {
-                case IDB_RESET_BUTTON:
-                    if(HIWORD(wParam) == BN_CLICKED)
-                    {
-                        // Temporary. Proof of concept.
-                        //colorSelect(hwnd, tmpColor);
-                    }
+                default:
+                    DefWindowProc(hwnd, WM_COMMAND, wParam, lParam);
                     break;
             }
             break;
@@ -420,6 +405,18 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             SelectObject(hdc, CreatePen(PS_SOLID, 1, RGB(0,0,0)));
             SelectObject(hdc, (HBRUSH)GetStockObject(WHITE_BRUSH));
             Rectangle(hdc, drawingArea.left, drawingArea.top, drawingArea.right, drawingArea.bottom);
+
+            tempRect.top = gradientRect.top;
+            tempRect.bottom = gradientRect.bottom;
+            for(int i = 0; i < (gradientRect.right - gradientRect.left); i++) {
+                int green;
+                green = i * 255 / (gradientRect.right - gradientRect.left);
+                tempRect.left  = gradientRect.left  + i;
+                tempRect.right = gradientRect.left + i + 1;
+                hBrush = CreateSolidBrush(RGB(0, green, 0));
+                FillRect(hdc, &tempRect, hBrush);
+                DeleteObject(hBrush);
+            }
 
             EndPaint(hwnd, &ps);
             break;
