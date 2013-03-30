@@ -10,12 +10,15 @@
 #define IDB_FILL_CHECK 106
 #define IDB_BORDER_WIDTH 107
 #define IDB_RESET_BUTTON 108
+#define IDB_BEZIER_TOOL 109
 
 LPSTR szClassName = "Lab3Class";
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE hInst;
 
 void updateColorControls(HDC, COLORREF, int, int);
+int getFromInput(HWND);
+POINT getCurrentPointPosition(int, int, RECT, int);
 
 COLORREF fillColor = RGB(255, 255, 255);
 COLORREF borderColor = RGB(0, 0, 0);
@@ -24,7 +27,7 @@ COLORREF colorSelect(HWND hwnd, COLORREF color)
     COLORREF g_rgbCustom[16] = {0};
     CHOOSECOLOR cc = {sizeof(CHOOSECOLOR)};
 
-    cc.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
+    cc.Flags = CC_RGBINIT | CC_SOLIDCOLOR;
     cc.hwndOwner = hwnd;
     cc.rgbResult = color;
     cc.lpCustColors = g_rgbCustom;
@@ -112,6 +115,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     static HWND hwndEraserWidth;
     static HWND hwndResetButton;
     static HWND hwndConfigGroup;
+    static HWND hwndBezierTool;
     RECT rect ;
     int screenW;
     int screenH;
@@ -122,9 +126,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     // Color preview rectangles
     HBRUSH hBrush;
     int xFillPreview   = 115;
-    int yFillPreview   = 180;
+    int yFillPreview   = 200;
     int xStrokePreview = 115;
-    int yStrokePreview = 230;
+    int yStrokePreview = 250;
 
 
     HDC hdcMem;
@@ -136,6 +140,24 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
     static RECT drawingArea = {170, 17, 780, 475};
     static RECT fillColorRect = {xFillPreview, yFillPreview, xFillPreview + 25, yFillPreview + 20};
     static RECT borderColorRect = {xStrokePreview, yStrokePreview, xStrokePreview + 25, yStrokePreview + 20};
+
+    // Drawing stuff
+    static POINT pointPen;
+    POINT point;
+    HPEN linePen;
+    int width;
+
+    static BOOL lineStarted;
+    static POINT line;
+    static BOOL rectangleStarted;
+    static RECT rectangle;
+    static BOOL ellipseStarted;
+    static RECT ellipse;
+    static int bezierStage = 0;
+    static POINT bezierPoints[4];
+
+    HPEN borderPen;
+    HBRUSH fillBrush;
 
     switch(msg)
     {
@@ -156,7 +178,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 "Tools",
                 WS_VISIBLE | WS_CHILD | BS_GROUPBOX,
                 15, 10,
-                140, 120,
+                140, 140,
                 hwnd,
                 (HMENU)IDB_TOOLS_GROUP,
                 hInst,
@@ -167,7 +189,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 0,
                 "Button",
                 "Pencil",
-                WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON,
+                WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
                 10, 15,
                 120, 20,
                 hwndToolsGroup,
@@ -181,7 +203,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 0,
                 "Button",
                 "Ellipse",
-                WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON,
+                WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
                 10, 35,
                 120, 20,
                 hwndToolsGroup,
@@ -194,7 +216,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 0,
                 "Button",
                 "Rectangle",
-                WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON,
+                WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
                 10, 55,
                 120, 20,
                 hwndToolsGroup,
@@ -207,11 +229,24 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 0,
                 "Button",
                 "Line",
-                WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON,
+                WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
                 10, 75,
                 120, 20,
                 hwndToolsGroup,
                 (HMENU)IDB_LINE_TOOL,
+                hInst,
+                NULL);
+
+            // Bezier tool
+            hwndBezierTool = CreateWindowEx(
+                0,
+                "Button",
+                "Bezier",
+                WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
+                10, 95,
+                120, 20,
+                hwndToolsGroup,
+                (HMENU)IDB_ERASER_TOOL,
                 hInst,
                 NULL);
 
@@ -220,8 +255,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 0,
                 "Button",
                 "Eraser",
-                WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON,
-                10, 95,
+                WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
+                10, 115,
                 120, 20,
                 hwndToolsGroup,
                 (HMENU)IDB_ERASER_TOOL,
@@ -234,7 +269,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 "Button",
                 "Config",
                 WS_VISIBLE | WS_CHILD | BS_GROUPBOX,
-                15, 140,
+                15, 160,
                 140, 180,
                 hwnd,
                 (HMENU)IDB_TOOLS_GROUP,
@@ -375,16 +410,16 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
             // Stroke color preview rectangle
             updateColorControls(hdc, borderColor, xStrokePreview, yStrokePreview);
 
+            // Draw image
+            hdcMem = CreateCompatibleDC(hdc);
+            SelectObject(hdcMem, hbmpDesignerImage);
+            BitBlt(hdc, 15, 340, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+            DeleteDC(hdcMem);
+
             // Blank draw area
             SelectObject(hdc, CreatePen(PS_SOLID, 1, RGB(0,0,0)));
             SelectObject(hdc, (HBRUSH)GetStockObject(WHITE_BRUSH));
             Rectangle(hdc, drawingArea.left, drawingArea.top, drawingArea.right, drawingArea.bottom);
-
-            // Draw image
-            hdcMem = CreateCompatibleDC(hdc);
-            SelectObject(hdcMem, hbmpDesignerImage);
-            BitBlt(hdc, 15, 335, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
-            DeleteDC(hdcMem);
 
             EndPaint(hwnd, &ps);
             break;
@@ -405,7 +440,167 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                     borderColor = colorSelect(hwnd, borderColor);
                     updateColorControls(hdc, borderColor, xFillPreview, yFillPreview);
                 }
+                return 0;
             }
+
+            if( (xMouse > drawingArea.left) && (xMouse < drawingArea.right) &&
+                (yMouse > drawingArea.top) && (yMouse < drawingArea.bottom) )
+            {
+                width = getFromInput(hwndBorderWidth);
+                point = getCurrentPointPosition(xMouse, yMouse, drawingArea, width);
+                xMouse = point.x;
+                yMouse = point.y;
+
+                // If Pencil tool is selected, setting startpoint
+                if((wParam == MK_LBUTTON) && (Button_GetCheck(hwndPencilTool) == BST_CHECKED))
+                {
+                    pointPen.x = xMouse;
+                    pointPen.y = yMouse;
+                }
+
+                // Line
+                if((wParam == MK_LBUTTON) && (Button_GetCheck(hwndLineTool) == BST_CHECKED))
+                {
+                    line.x = xMouse;
+                    line.y = yMouse;
+                    lineStarted = true;
+                }
+
+                // Rectangle
+                if((wParam == MK_LBUTTON) && (Button_GetCheck(hwndRectangleTool) == BST_CHECKED))
+                {
+                    rectangle.left = xMouse;
+                    rectangle.top = yMouse;
+                    rectangleStarted = true;
+                }
+
+                // Ellipse
+                if((wParam == MK_LBUTTON) && (Button_GetCheck(hwndEllipseTool) == BST_CHECKED))
+                {
+                    ellipse.left = xMouse;
+                    ellipse.top = yMouse;
+                    ellipseStarted = true;
+                }
+
+                // Bezierceg
+                if((wParam == MK_LBUTTON) && (Button_GetCheck(hwndBezierTool) == BST_CHECKED))
+                {
+                    if(bezierStage == 0)
+                    {
+                        bezierPoints[0] = point;
+                        bezierStage = 1;
+                    }
+                    else
+                    {
+                        bezierPoints[2] = point;
+                        bezierStage = 3;
+                    }
+                }
+            }
+            break;
+
+        case WM_LBUTTONUP:
+            xMouse = GET_X_LPARAM(lParam);
+            yMouse = GET_Y_LPARAM(lParam);
+            width = getFromInput(hwndBorderWidth);
+            point = getCurrentPointPosition(xMouse, yMouse, drawingArea, width);
+            xMouse = point.x;
+            yMouse = point.y;
+
+            borderPen = CreatePen(PS_SOLID, width, borderColor);
+            if(Button_GetCheck(hwndFillCheck) == BST_CHECKED)
+                fillBrush = CreateSolidBrush(fillColor);
+            else
+                fillBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
+
+            if(lineStarted)
+            {
+                SelectObject(hdc, borderPen);
+                MoveToEx(hdc, xMouse, yMouse, NULL);
+                LineTo(hdc, line.x, line.y);
+                DeleteObject(borderPen);
+                lineStarted = false;
+            }
+
+            if(rectangleStarted)
+            {
+                SelectObject(hdc, borderPen);
+                SelectObject(hdc, fillBrush);
+                Rectangle(hdc, rectangle.left, rectangle.top, xMouse, yMouse);
+
+                DeleteObject(borderPen);
+                DeleteObject(fillBrush);
+
+                rectangleStarted = false;
+            }
+
+            if(ellipseStarted)
+            {
+                SelectObject(hdc, borderPen);
+                SelectObject(hdc, fillBrush);
+
+                Ellipse(hdc, ellipse.left, ellipse.top, xMouse, yMouse);
+                DeleteObject(borderPen);
+                DeleteObject(fillBrush);
+
+                ellipseStarted = false;
+            }
+
+            if(bezierStage == 1)
+            {
+                bezierPoints[1] = point;
+                bezierStage = 2;
+            }
+
+            if(bezierStage == 3)
+            {
+                bezierPoints[3] = point;
+                bezierStage = 0;
+                SelectObject(hdc, borderPen);
+                PolyBezier(hdc, bezierPoints, 4);
+                DeleteObject(borderPen);
+            }
+            break;
+
+        case WM_MOUSEMOVE:
+            xMouse = GET_X_LPARAM(lParam);
+            yMouse = GET_Y_LPARAM(lParam);
+            if( (xMouse > drawingArea.left) && (xMouse < drawingArea.right) &&
+                (yMouse > drawingArea.top) && (yMouse < drawingArea.bottom) )
+            {
+                 // If Pen tool is selected
+                if((wParam == MK_LBUTTON) && (Button_GetCheck(hwndPencilTool) == BST_CHECKED))
+                {
+                    width = getFromInput(hwndBorderWidth);
+                    point = getCurrentPointPosition(xMouse, yMouse, drawingArea, width);
+                    xMouse = point.x;
+                    yMouse = point.y;
+                    linePen = CreatePen(PS_SOLID, width, borderColor);
+                    SelectObject(hdc, linePen);
+                    MoveToEx(hdc, xMouse, yMouse, NULL);
+                    LineTo(hdc, pointPen.x, pointPen.y);
+                    DeleteObject(linePen);
+                    pointPen.x = xMouse;
+                    pointPen.y = yMouse;
+                }
+
+                // If Eraser tool is selected
+                if((wParam == MK_LBUTTON) && (Button_GetCheck(hwndEraserTool) == BST_CHECKED))
+                {
+                    width = getFromInput(hwndEraserWidth);
+                    point = getCurrentPointPosition(xMouse, yMouse, drawingArea, width);
+                    xMouse = point.x;
+                    yMouse = point.y;
+                    rect.left = point.x - (width / 2);
+                    rect.right = point.x + (width / 2);
+                    rect.top = point.y - (width / 2);
+                    rect.bottom = point.y + (width / 2);
+                    InvalidateRect(hwnd, &rect, FALSE);
+                    SendMessage(hwnd, WM_PAINT, 0, 0);
+                    //ValidateRect(hwnd, &rect);
+                }
+            }
+
             break;
 
         case WM_CLOSE:
@@ -440,4 +635,38 @@ void updateColorControls(HDC hdc, COLORREF rgb, int xLeft, int yTop)
 
     DeleteObject(hPen);
     DeleteObject(hBrush);
+}
+
+int getFromInput(HWND input)
+{
+    int result, len;
+    len = SendMessage(input, WM_GETTEXTLENGTH, 0, 0);
+
+    char * temp = (char *)malloc(len + 1);
+    SendMessage(input, WM_GETTEXT, len + 1, (LPARAM)temp);
+    result = atoi(temp);
+    free(temp);
+    return result;
+}
+
+POINT getCurrentPointPosition(int xMouse, int yMouse, RECT limit, int width)
+{
+    POINT result;
+    width = width / 2 + 1;
+
+    if(xMouse + width > limit.right)
+        result.x = limit.right - width;
+    else if(xMouse - width < limit.left)
+        result.x = limit.left + width;
+    else
+        result.x = xMouse;
+
+    if(yMouse - width < limit.top)
+        result.y = limit.top + width;
+    else if(yMouse + width > limit.bottom)
+        result.y = limit.bottom - width;
+    else
+        result.y = yMouse;
+
+    return result;
 }
