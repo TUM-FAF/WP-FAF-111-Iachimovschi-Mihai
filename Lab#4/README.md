@@ -17,7 +17,7 @@
 At this laboratory work I haven't created a sketch because the base UI is just a window with a active area.
 
 ## Result
-![Result]()
+![Result](https://raw.github.com/TUM-FAF/WP-FAF-111-Iachimovschi-Mihai/master/Lab%234/pics/screenshot.png)
 
 ## Outro
 This laboratory work was quite interesting, I solved the flickering problem and was quite confortable with the winapi.
