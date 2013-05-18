@@ -19,7 +19,7 @@
 
 #adviceListView .win-container {
     background-color: #706b6e;
-    border-color: #413b40;
+    border-color: #303030;
 }
 
 #adviceListView .win-container:hover {
@@ -45,20 +45,16 @@
     display: block;
     font-size: 40px;
     font-weight: lighter;
-    margin-top: 0;
+    margin-top: 35px;
 }
 
 .adviceItem h4 {
-    font-size: 40px;
+    font-size: 35px;
     font-weight: lighter;
-    height: 40px;
-    line-height: 40px;
+    height: 35px;
+    line-height: 35px;
     margin-top: 20px;
     overflow: hidden;
-}
-
-.adviceItem h6 {
-    font-size: 13px;
 }
 
 @media screen and (-ms-view-state: snapped) {
