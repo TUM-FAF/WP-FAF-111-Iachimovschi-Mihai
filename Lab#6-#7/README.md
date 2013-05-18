@@ -8,7 +8,7 @@
 * Create an application that will get JSON from fucking-great-advice.ru and will place the results on a grid layout with detail view.
 
 ## Completed Objectives With Points
-* ~~Your application should have at least 3 screens/windows **(3 pt)**~~
+* Your application should have at least 3 screens/windows **(3 pt)**
 * Intuitive design **(2 pt)**
 * Follow WinRT applications life cycle **(2 pt)**
 
@@ -22,8 +22,6 @@ The concept of using CSS/JS/HTML on desktop apps seems strange, but I've already
 
 ## Result - details page
 ![Result](https://raw.github.com/TUM-FAF/WP-FAF-111-Iachimovschi-Mihai/master/Lab%236-%237/pics/screenshot-detail.png)
-
-## ~~Result - * page~~
 
 ## Outro
 Switching from Win32 API to WinRT API was very useful for us, because we finally used a more up to date technology.
